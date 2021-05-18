@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/danpaul81/idsparser"
+	"github.com/danpaul81/idsreplay/idsparser"
 )
 
 var CountRuleMatch int
