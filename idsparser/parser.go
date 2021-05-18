@@ -54,7 +54,7 @@ func ParseRule(ruleLine string, rule *Rule) error {
 		if string(ruleLine[0]) != "#" {
 			return (errors.New("single rule: no rule regex match"))
 		} else {
-			return (errors.New("comment line"))
+			return (errors.New("commented line"))
 		}
 	}
 }
