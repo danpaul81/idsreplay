@@ -1,0 +1,11 @@
+
+
+
+
+General: Rule splitting
+    opt parsing splits options by ";" which can also be used in pcre? (anywhere else?)  -> fix this
+
+Option values can be hexadecimal encoded e.g. "http |3A|//"  -> need to decode before storing option
+
+HTTP Replay Parsing:
+add http_header handling
