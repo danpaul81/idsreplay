@@ -1,0 +1,80 @@
+# yaml to demo in NSX-T Container Networking Environments
+# make sure you create a security group for IDS destination matching on Segment Port equals idsreplay Scope app
+apiVersion: v1
+kind: Namespace
+metadata:
+        name: ns-idsreplay
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+        name: depl-idsreplay-source
+        labels:
+                app: idsreplay
+        namespace: ns-idsreplay
+spec:
+        selector:
+          matchLabels:
+            app: idsreplay
+            tier: source
+        replicas: 4
+        template:
+                metadata:
+                        labels:
+                                app: idsreplay
+                                tier: source
+                spec:
+                        containers:
+                                - name: idsreplay-source
+                                  #image: danpaul81/idsreplay
+                                  image: harbor-repo.vmware.com/dpaul/idsreplay
+                                  imagePullPolicy: Always
+                                  env:
+                                  - name: IDSREPLAYOPTS
+                                    value: "--dest svc-idsreplay --dport 80 --rulefile /idsreplay/emerging-all.rules"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+        name: depl-idsreplay-target
+        labels:
+                app: idsreplay
+        namespace: ns-idsreplay
+spec:
+        selector:
+          matchLabels:
+             app: idsreplay
+             tier: target
+        replicas: 4
+        template:
+                metadata:
+                        labels:
+                                app: idsreplay
+                                tier: target
+                spec:
+                        containers:
+                                - name: idsreplay-target
+                                  #image: danpaul81/nsx-demo
+                                  image: harbor-repo.vmware.com/dpaul/golangweb 
+                                  imagePullPolicy: Always
+                                  env:
+                                  - name: GOLANGWEBOPTS
+                                    value: "--port 5001"
+                                  ports:
+                                     - containerPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+        name: svc-idsreplay
+        labels:
+                app: idsreplay
+        namespace: ns-idsreplay
+spec:
+        ports:
+                - port: 80
+                  targetPort: 5001
+        selector:
+                app: idsreplay
+                tier: target
+        type: ClusterIP
