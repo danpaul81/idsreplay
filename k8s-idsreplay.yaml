@@ -55,7 +55,7 @@ spec:
                         containers:
                                 - name: idsreplay-target
                                   #image: danpaul81/nsx-demo
-                                  image: harbor-repo.vmware.com/dpaul/golangweb 
+                                  image: harbor-repo.vmware.com/dpaul/nsx-demo 
                                   imagePullPolicy: Always
                                   env:
                                   - name: GOLANGWEBOPTS
