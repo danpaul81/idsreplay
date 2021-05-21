@@ -31,7 +31,7 @@ spec:
                                   imagePullPolicy: Always
                                   env:
                                   - name: IDSREPLAYOPTS
-                                    value: "--dest svc-idsreplay --dport 80 --rulefile /idsreplay/emerging-all.rules"
+                                    value: "--dest svc-idsreplay --dport 80"
 ---
 apiVersion: apps/v1
 kind: Deployment
