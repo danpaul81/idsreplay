@@ -47,7 +47,7 @@ func main() {
 	portPtr := flag.Uint64("dport", 80, "IP port of IDS replay target")
 	waitsecPtr := flag.Int("waitsec", 5, "seconds to wait between replay attempts. Note: Not each attempt might be successful")
 	replayCountPtr := flag.Uint("count", 0, "# of IDS replay attemps (will count successful TCP connections doing a replay request). 0 for infinite")
-	rulePtr := flag.String("rulefile", "emerging-all.rules", "IDS signatures source. Suricata 4 format.")
+	rulePtr := flag.String("rulefile", "/idsreplay/emerging-all.rules", "IDS signatures source. Suricata 4 format.")
 	flag.Parse()
 
 	if *portPtr > 65535 {
