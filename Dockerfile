@@ -1,4 +1,4 @@
 FROM photon:latest
-COPY ./idsreplay /idsreplay/
+COPY ./bin/idsreplay /idsreplay/
 COPY emerging-all.rules /idsreplay/
 CMD /idsreplay/idsreplay $IDSREPLAYOPTS
