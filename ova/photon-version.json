@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "description": "IDSreplay Appliance",
+  "vm_name": "IDSreplay_Appliance",
+  "iso_checksum": "md5:20f48f2dfe8d40a914609eb6b220fd70",
+  "iso_url": "https://packages.vmware.com/photon/4.0/GA/iso/photon-minimal-4.0-1526e30ba.iso",
+  "numvcpus": "2",
+  "ramsize": "4096",
+  "guest_username": "root",
+  "guest_password": "VMware1!"
+}

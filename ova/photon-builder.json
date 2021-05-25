@@ -1,0 +1,10 @@
+{
+  "vcenter_server": "192.168.110.22",
+  "vcenter_username": "administrator@vsphere.local",
+  "vcenter_password": "VMware1!",
+  "vcenter_datacenter": "DC-SiteA",
+  "vcenter_cluster": "Compute-Cluster",
+  "vcenter_datastore": "Datastore",
+  "vcenter_portgroup": "OL_SEG_10"
+}
+

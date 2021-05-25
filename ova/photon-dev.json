@@ -1,0 +1,126 @@
+{
+  "variables": {
+    "photon_ovf_template": "photon.xml.template",
+    "ovftool_deploy_vcenter": "192.168.110.22",
+    "ovftool_deploy_vcenter_username": "administrator@vsphere.local",
+    "ovftool_deploy_vcenter_password": "VMware1!",
+    "ovftool_deploy_datacenter": "DC-SiteA",
+    "ovftool_deploy_cluster": "Compute-Cluster",
+    "ovftool_deploy_vm_name1": "PACKER-TEST-idsreplay-src-Appliance",
+    "ovftool_deploy_vm_name2": "PACKER-TEST-idsreplay-tgt-Appliance",
+    "ovftool_deploy_vm_hostname1": "idsreplay-src.corp.local",
+    "ovftool_deploy_vm_hostname2": "idsreplay-tgt.corp.local",
+    "ovftool_deploy_vm_ip_address1": "172.16.10.151",
+    "ovftool_deploy_vm_ip_address2": "172.16.10.152",
+    "ovftool_deploy_vm_prefix": "24",
+    "ovftool_deploy_vm_gateway": "172.16.10.1",
+    "ovftool_deploy_vm_dns": "192.168.110.10",
+    "ovftool_deploy_vm_dns_domain": "corp.local",
+    "ovftool_deploy_vm_root_password": "VMware1!",
+    "ovftool_deploy_vm_vcenter_server": "192.168.110.22",
+    "ovftool_deploy_vm_vcenter_username": "administrator@vsphere.local",
+    "ovftool_deploy_vm_vcenter_password": "VMware1!",
+    "ovftool_deploy_vm_network": "OL_SEG_10",
+    "ovftool_deploy_vm_datastore": "Datastore",
+    "ovftool_deploy_idsreplayport": "82",
+    "ovftool_deploy_idsreplaytargetip": "172.16.10.152"
+
+  },
+  "builders": [
+    {
+      "type": "vsphere-iso",
+      "vm_name": "{{ user `vm_name` }}",
+      "guest_os_type": "other3xLinux64Guest",
+      "vm_version": "13",
+      "storage": [
+       {
+         "disk_size": 4000 ,
+         "disk_thin_provisioned": true
+       }
+      ],
+      "boot_command": [
+        "<esc><wait>",
+        "vmlinuz initrd=initrd.img root=/dev/ram0 loglevel=3 insecure_installation=1 ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/photon-kickstart.json photon.media=cdrom",
+        "<enter>"
+      ],
+      "boot_wait": "10s",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "http_directory": "http",
+      "vcenter_server": "{{ user `vcenter_server` }}",
+      "username": "{{ user `vcenter_username` }}",
+      "password": "{{ user `vcenter_password` }}",
+      "datastore": "{{ user `vcenter_datastore` }}",
+      "insecure_connection": true,
+      "datacenter": "{{ user `vcenter_datacenter`}}",
+      "cluster": "{{ user `vcenter_cluster`}}",
+      "ssh_username": "{{ user `guest_username` }}",
+      "ssh_password": "{{ user `guest_password` }}",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "60m",
+      "export": {
+        "force": true,
+        "output_directory": "output-vsphere-iso/{{ user `vm_name`}}"
+      },
+      "shutdown_command": "/sbin/shutdown -h now",
+      "shutdown_timeout": "1000s",
+      "CPUs": "{{ user `numvcpus` }}",
+      "RAM": "{{ user `ramsize` }}",
+      "network_adapters": [
+       {
+        "network": "{{ user `vcenter_portgroup`}}",
+        "network_card": "vmxnet3"
+       }
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/photon-settings.sh",
+        "scripts/photon-cleanup.sh"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "files/rc.local",
+      "destination": "/etc/rc.d/rc.local"
+    },
+    {
+      "type": "file",
+      "source": "files/setup.sh",
+      "destination": "/root/setup.sh"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "environment_vars": ["PHOTON_VERSION={{ user `version` }}", "PHOTON_APPLIANCE_NAME={{ user `vm_name` }}", "FINAL_PHOTON_APPLIANCE_NAME={{ user `vm_name` }}_{{user `version`}}", "PHOTON_OVF_TEMPLATE={{ user `photon_ovf_template` }}"],
+      "inline": [
+        "cd manual",
+        "./add_ovf_properties.sh"
+      ]
+    },
+     {
+      "type": "shell-local",
+      "inline": [
+        "ovftool --noSSLVerify --powerOn --name={{ user `ovftool_deploy_vm_name1` }} --net:'{{ user `vcenter_port_group`}}={{ user `ovftool_deploy_vm_network` }}' --datastore={{ user `ovftool_deploy_vm_datastore` }} --prop:guestinfo.hostname={{ user `ovftool_deploy_vm_hostname1` }} --prop:guestinfo.ipaddress={{ user `ovftool_deploy_vm_ip_address1` }} --prop:guestinfo.netmask={{ user `ovftool_deploy_vm_prefix` }} --prop:guestinfo.gateway={{ user `ovftool_deploy_vm_gateway` }} --prop:guestinfo.dns={{ user `ovftool_deploy_vm_dns` }} --prop:guestinfo.domain={{ user `ovftool_deploy_vm_dns_domain` }} --prop:guestinfo.root_password={{ user `ovftool_deploy_vm_root_password` }} --prop:guestinfo.debug=True --prop:guestinfo.idsreplaysource=True --prop:guestinfo.idsreplayport={{ user `ovftool_deploy_idsreplayport` }} --prop:guestinfo.idsreplaytargetip={{ user `ovftool_deploy_idsreplaytargetip` }} output-vsphere-iso/{{ user `vm_name` }}_{{user `version`}}.ova 'vi://{{ user `ovftool_deploy_vcenter_username` }}:{{ user `ovftool_deploy_vcenter_password` }}@{{ user `ovftool_deploy_vcenter` }}/{{ user `ovftool_deploy_datacenter` }}/host/{{ user `ovftool_deploy_cluster` }}/'"
+      ]
+    },
+ {
+      "type": "shell-local",
+      "inline": [
+        "ovftool --noSSLVerify --powerOn --name={{ user `ovftool_deploy_vm_name2` }} --net:'{{ user `vcenter_port_group`}}={{ user `ovftool_deploy_vm_network` }}' --datastore={{ user `ovftool_deploy_vm_datastore` }} --prop:guestinfo.hostname={{ user `ovftool_deploy_vm_hostname2` }} --prop:guestinfo.ipaddress={{ user `ovftool_deploy_vm_ip_address2` }} --prop:guestinfo.netmask={{ user `ovftool_deploy_vm_prefix` }} --prop:guestinfo.gateway={{ user `ovftool_deploy_vm_gateway` }} --prop:guestinfo.dns={{ user `ovftool_deploy_vm_dns` }} --prop:guestinfo.domain={{ user `ovftool_deploy_vm_dns_domain` }} --prop:guestinfo.root_password={{ user `ovftool_deploy_vm_root_password` }} --prop:guestinfo.debug=True --prop:guestinfo.idsreplaysource=False --prop:guestinfo.idsreplayport={{ user `ovftool_deploy_idsreplayport` }} output-vsphere-iso/{{ user `vm_name` }}_{{user `version`}}.ova 'vi://{{ user `ovftool_deploy_vcenter_username` }}:{{ user `ovftool_deploy_vcenter_password` }}@{{ user `ovftool_deploy_vcenter` }}/{{ user `ovftool_deploy_datacenter` }}/host/{{ user `ovftool_deploy_cluster` }}/'"
+      ]
+    },
+
+    {
+      "type": "shell-local",
+      "inline": [
+        "pwsh -F remove_vm.ps1 {{ user `ovftool_deploy_vcenter` }} {{ user `ovftool_deploy_vcenter_username` }} {{ user `ovftool_deploy_vcenter_password` }} {{ user `vm_name` }}"
+      ]
+    }
+  ]
+}
+
