@@ -27,12 +27,12 @@ docker run --name=idsreplay -e IDSREPLAYOPTS='--dest 172.16.10.20 --dport 80’ 
 docker run --name=nsx-demo -p 80:5000  danpaul81/nsx-demo
 ```
 
-### b) k8s deployment
-This is rolling out a "target", a k8s service and the idsreplay source deployment.
+### b) k8s deployment when using NSX CNI
+This is rolling out a "target", a k8s service and the idsreplay "source" deployment within a new namespace.
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/danpaul81/idsreplay/main/k8s-idsreplay.yaml
 ````
-When using in public internet change the image source to your own registry / dockerhub
+When using in non-vmware corp network  change the image source to your own registry / dockerhub
 
 ### c) OVA Image
 Download from [my repo](https://github.com/danpaul81/idsparser/ova/output-vsphere-iso)
@@ -44,7 +44,7 @@ Target and Source are combined in this ova.
 #### Deploy second time with option "IDS Replay Source" = False and the Target Port
 
 ## How to Demo NSX IPS mode?
-Most of the replayed rules will match NSX IDS Signature 2024897 which matches the http user agent "go http client user agent". 
+Most of the replayed rules will match NSX IDS Signature 2024897 which matches the http user agent "go http client user-agent". 
 
 Setting this signature action to "drop" and creating a prevent rule should work fine.
 
@@ -59,8 +59,4 @@ Valid options are:
 --waitsec [seconds to wait between replay attempts], default 5
 --rulefile [path to ids signatures, suricata 4 format] default /idsreplay/emerging-all.rules
 ```
-
-
-
-
 
