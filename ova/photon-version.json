@@ -6,6 +6,7 @@
   "iso_url": "https://packages.vmware.com/photon/4.0/GA/iso/photon-minimal-4.0-1526e30ba.iso",
   "numvcpus": "2",
   "ramsize": "4096",
+  "disksize": "4000",
   "guest_username": "root",
   "guest_password": "VMware1!"
 }

@@ -13,7 +13,7 @@
       "vm_version": "13",
       "storage": [
        {
-         "disk_size": 4000 ,
+         "disk_size": "{{ user `disksize`}}",
          "disk_thin_provisioned": true
        }
       ],
