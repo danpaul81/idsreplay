@@ -9,7 +9,7 @@ The current version parses rules from the [Open Emerging Threats Ruleset](https:
 
 
 
-## How to run?
+## 1) How to run?
 
 idsreplay source and binary is available [here](https://github.com/danpaul81/idsreplay). 
 
@@ -43,12 +43,12 @@ Target and Source are combined in this ova.
 
 #### Deploy second time with option "IDS Replay Source" = False and the Target Port
 
-## How to Demo NSX IPS mode?
+## 2) How to Demo NSX IPS mode?
 Most of the replayed rules will match NSX IDS Signature 2024897 which matches the http user agent "go http client user-agent". 
 
 Setting this signature action to "drop" and creating a prevent rule should work fine.
 
-## idsreplay command line options
+## 3) idsreplay command line options
 You can pass command line options to container based workloads using the IDSREPLAYOPTS environment variable. 
 
 Valid options are:
