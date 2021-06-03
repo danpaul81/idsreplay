@@ -35,7 +35,7 @@ kubectl apply -f https://raw.githubusercontent.com/danpaul81/idsreplay/main/k8s-
 When using in non-vmware corp network  change the image source to your own registry / dockerhub
 
 ### c) OVA Image
-Download from [my repo](https://github.com/danpaul81/idsparser/ova/output-vsphere-iso)
+Download from [my repo](https://github.com/danpaul81/idsreplay/ova/output-vsphere-iso)
 
 Target and Source are combined in this ova.
 
