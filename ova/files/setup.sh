@@ -103,6 +103,7 @@ Description = idsreplay systemd service
 After=docker.service
 
 [Service]
+StandardOutput=journal+console
 ExecStart=${IDSSTARTCMD}
 ExecStop=${IDSSTOPCMD}
 
