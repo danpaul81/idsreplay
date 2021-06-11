@@ -1,7 +1,6 @@
 package idsparser
 
 import (
-	"errors"
 	"regexp"
 	"strings"
 )
@@ -15,7 +14,7 @@ func inSlice(str string, strings []string) bool {
 	return false
 }
 
-func ParseRule(ruleLine string, rule *Rule) error {
+func ParseRule(ruleLine string, rule *Rule, debug bool) error {
 
 	ruleLine = strings.TrimSpace(ruleLine)
 	regExRule := `^(?P<comment>^#*[[:space:]#]*)(?P<header>[^()]+\((?P<options>.*)\)$)`
@@ -24,7 +23,6 @@ func ParseRule(ruleLine string, rule *Rule) error {
 
 	if compRegExRule.MatchString(ruleLine) {
 		match := compRegExRule.FindStringSubmatch(ruleLine)
-		//fmt.Println(compRegEx.SubexpNames()[1])
 
 		// is rule commented?
 		if strings.Contains(match[1], "#") {
@@ -39,22 +37,25 @@ func ParseRule(ruleLine string, rule *Rule) error {
 		if inSlice(header[0], []string{"alert", "drop"}) {
 			rule.Action = header[0]
 		} else {
-			return (errors.New("unknown header action"))
+			return &ErrorUnknownHeaderAction{}
 		}
 
 		if inSlice(header[1], allProtocolMatchTypeNames()) {
 			rule.Protocol = getProtocolMatchTypeIndex(header[1])
 			rule.RawOptions = match[3]
 		} else {
-			return (errors.New("unknown header protocol"))
+			return &ErrorUnknownHeaderProtocol{}
 		}
 
 		return (nil)
 	} else {
 		if string(ruleLine[0]) != "#" {
-			return (errors.New("single rule: no rule regex match"))
+			// line isn't commented and no regex match. look for error in rule or in regex...
+			return &ErrorNoRuleRegexMatch{}
 		} else {
-			return (errors.New("commented line"))
+			// commented line without regex match. may be text or a rule which doesnt match regex
+			return &ErrorCommentLine{}
+
 		}
 	}
 }

@@ -1,5 +1,30 @@
 package idsparser
 
+// error definitions
+type ErrorCommentLine struct{}
+
+func (e *ErrorCommentLine) Error() string {
+	return "commented line in rulefile. no rule regex match"
+}
+
+type ErrorUnknownHeaderAction struct{}
+
+func (e *ErrorUnknownHeaderAction) Error() string {
+	return "unknown rule header action."
+}
+
+type ErrorUnknownHeaderProtocol struct{}
+
+func (e *ErrorUnknownHeaderProtocol) Error() string {
+	return "unknown header protocol."
+}
+
+type ErrorNoRuleRegexMatch struct{}
+
+func (e *ErrorNoRuleRegexMatch) Error() string {
+	return "no rule regex match"
+}
+
 type Rule struct {
 	Commented bool
 	Action    string
