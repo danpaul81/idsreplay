@@ -1,56 +1,82 @@
-    <ProductSection ovf:required="true">
-    <Info>Information about the installed software</Info>
-      <Product>idsreplay Appliance</Product>
-      <Vendor>Daniel Paul</Vendor>
-      <Version>{{VERSION}}</Version>
-      <ProductUrl>https://github.com/danpaul81/idsreplay</ProductUrl>
-      <VendorUrl></VendorUrl>
-      <Category>Networking</Category>
-        <Property ovf:key="guestinfo.hostname" ovf:type="string" ovf:userConfigurable="true">
-            <Label>Hostname</Label>
-            <Description>Hostname of system</Description>
-        </Property>
-        <Property ovf:key="guestinfo.ipaddress" ovf:type="string" ovf:userConfigurable="true">
-            <Label>IP Address</Label>
-            <Description>IP Address of the system</Description>
-        </Property>
-        <Property ovf:key="guestinfo.netmask" ovf:type="string" ovf:userConfigurable="true">
-            <Label>Netmask Prefix</Label>
-            <Description>CIDR notation (e.g. 24 for 255.255.255.0, 28 for 255.255.255.240)</Description>
-        </Property>
-        <Property ovf:key="guestinfo.gateway" ovf:type="string" ovf:userConfigurable="true">
-            <Label>Gateway</Label>
-            <Description>Gateway of the system</Description>
-        </Property>
-        <Property ovf:key="guestinfo.dns" ovf:type="string" ovf:userConfigurable="true">
-            <Label>DNS</Label>
-            <Description>DNS Server</Description>
-        </Property>
-        <Property ovf:key="guestinfo.domain" ovf:type="string" ovf:userConfigurable="true">
-            <Label>DNS Domain</Label>
-            <Description>DNS Domain</Description>
-        </Property>
-        <Category>Credentials</Category>
-        <Property ovf:key="guestinfo.root_password" ovf:password="true" ovf:type="string" ovf:userConfigurable="true" ovf:value="">
-            <Label>Root Password</Label>
-            <Description>Password to login in as root. Please use a secure password</Description>
-        </Property>
+<?xml version='1.0' encoding='UTF-8'?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+  <References>
+    <File ovf:href="{{APPLIANCENAME}}-disk-0.vmdk" ovf:id="file1" ovf:size="{{DISKSIZE}}"/>
+    <File ovf:href="{{APPLIANCENAME}}-disk-0.vmdk" ovf:id="file2" ovf:size="{{DISKSIZE}}"/>
+  </References>
+  <DiskSection>
+    <Info>List of the virtual disks</Info>
+    <Disk ovf:capacityAllocationUnits="byte" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:diskId="vmdisk1" ovf:capacity="4194304000" ovf:fileRef="file1"/>
+    <Disk ovf:capacityAllocationUnits="byte" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:diskId="vmdisk2" ovf:capacity="4194304000" ovf:fileRef="file2"/>
+  </DiskSection>
+  <NetworkSection>
+    <Info>The list of logical networks</Info>
+    <Network ovf:name="{{NETWORK}}">
+      <Description>The VM network</Description>
+    </Network>
+  </NetworkSection>
+  <vmw:IpAssignmentSection>
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <VirtualSystemCollection ovf:id="IDSReplayVAPP">
+    <Info>A virtual system collection</Info>
+    <Name>IDSreplay vApp</Name>
+    <StartupSection>
+      <Info>Specifies the startup order of the application.</Info>
+      <Item ovf:startDelay="20" ovf:id="{{APPLIANCENAME}}_{{VERSION}}_dst" ovf:stopDelay="20" ovf:order="1"/>
+      <Item ovf:startDelay="20" ovf:id="{{APPLIANCENAME}}_{{VERSION}}_src" ovf:stopDelay="20" ovf:order="2"/>
+    </StartupSection>
+    <ProductSection>
+        <Info>Information about the installed software</Info>
+        <Product>IDSreplay vApp</Product>
+        <Vendor>Daniel Paul</Vendor>
+        <Version>{{VERSION}}</Version>
+        <ProductUrl>https://github.com/danpaul81/idsreplay</ProductUrl>
         <Category>idsreplay</Category>
-        <Property ovf:key="guestinfo.idsreplaysource" ovf:type="boolean" ovf:userConfigurable="true" ovf:value="true">
-            <Label>IDSreplay Source</Label>
-            <Description>is this idsreplay source? If yes, also provide target IP</Description>
+        <Property ovf:userConfigurable="true" ovf:value="idsreplay-src" ovf:type="string" ovf:key="guestinfo.src_hostname">
+          <Label>Source Hostname</Label>
+          <Description>Hostname of source system (leave blank for DHCP)</Description>
         </Property>
-        <Property ovf:key="guestinfo.idsreplaytargetip" ovf:type="string" ovf:userConfigurable="true" ovf:value="127.0.0.1">
-            <Label>Target IP</Label>
-            <Description>IP Address to send idsreplay packets</Description>
+        <Property ovf:userConfigurable="true" ovf:value="172.16.10.110" ovf:type="string" ovf:key="guestinfo.src_ip">
+          <Label>Source IP</Label>
+          <Description>IP Address for source</Description>
         </Property>
-        <Property ovf:key="guestinfo.idsreplayport" ovf:type="string" ovf:userConfigurable="true" ovf:value="80">
-            <Label>Target Port</Label>
-            <Description>TCP Port to send idsreplay packets</Description>
+        <Property ovf:userConfigurable="true" ovf:value="idsreplay-dst" ovf:type="string" ovf:key="guestinfo.dst_hostname">
+          <Label>Destination Hostname</Label>
+          <Description>Hostname of destination system (leave blank for DHCP)</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="172.16.10.111" ovf:type="string" ovf:key="guestinfo.dst_ip">
+          <Label>Destination IP</Label>
+          <Description>IP Address for destination</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="80" ovf:type="string" ovf:key="guestinfo.idsreplayport">
+          <Label>Target Port</Label>
+          <Description>TCP Port to use for idsreplay</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="24" ovf:type="string" ovf:key="guestinfo.netmask">
+          <Label>Netmask Prefix</Label>
+          <Description>CIDR notation (e.g. 24 for 255.255.255.0, 28 for 255.255.255.240)</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:password="true" ovf:type="string" ovf:key="guestinfo.root_password">
+          <Label>Root Password</Label>
+          <Description>Password to login in as root. Please use a secure password</Description>
+        </Property>
+        <Category>optional Networking</Category>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.gateway">
+          <Label>Default Gateway</Label>
+          <Description>(optional)</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.dns">
+          <Label>DNS Server</Label>
+          <Description>(optional)</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.domain">
+          <Label>DNS Domain</Label>
+          <Description>(optional)</Description>
         </Property>
         <Category>zDebug</Category>
-        <Property ovf:key="guestinfo.debug" ovf:type="boolean" ovf:userConfigurable="true" ovf:value="false">
-            <Label>Debugging</Label>
-            <Description>Enable Debugging</Description>
+        <Property ovf:userConfigurable="true" ovf:value="False" ovf:type="boolean" ovf:key="guestinfo.debug">
+          <Label>Debugging</Label>
+          <Description>Enable Debugging</Description>
         </Property>
     </ProductSection>

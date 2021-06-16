@@ -9,7 +9,7 @@ if [ -e /root/ran_customization ]; then
 else
     NETWORK_CONFIG_FILE=$(ls /etc/systemd/network | grep .network)
 
-    DEBUG_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.debug")
+    DEBUG_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.debug")
     DEBUG=$(echo "${DEBUG_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
     LOG_FILE=/var/log/bootstrap.log
     if [ ${DEBUG} == "True" ]; then
@@ -22,15 +22,30 @@ else
         echo
     fi
 
-    HOSTNAME_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.hostname")
-    IP_ADDRESS_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.ipaddress")
-    NETMASK_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.netmask")
-    GATEWAY_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.gateway")
-    DNS_SERVER_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.dns")
-    DNS_DOMAIN_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.domain")
-    ROOT_PASSWORD_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.root_password")
+    SRC_HOSTNAME_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.src_hostname")
+    DST_HOSTNAME_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.dst_hostname")
+    SRC_IP_ADDRESS_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.src_ip")
+    DST_IP_ADDRESS_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.dst_ip")
+    NETMASK_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.netmask")
+    GATEWAY_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.gateway")
+    DNS_SERVER_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.dns")
+    DNS_DOMAIN_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.domain")
+    ROOT_PASSWORD_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.root_password")
+    IDSREPLAY_ROLE_PROPERTY==$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.idsreplayrole")
+    IDSREPLAY_PORT_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.idsreplayport")
 
 
+    ROLE=$(echo "${IDSREPLAY_ROLE_PROPERTY}" | cut -d'"' -f4)
+    IDSREPLAY_PORT=$(echo "${IDSREPLAY_PORT_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
+
+    if [ ${ROLE} == "source" ]; then
+        DST_IP_ADDRESS=$(echo "${DST_IP_ADDRESS_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
+	IP_ADDRESS_PROPERTY=$SRC_IP_ADDRESS_PROPERTY
+	HOSTNAME_PROPERTY=$SRC_HOSTNAME_PROPERTY
+    else
+	IP_ADDRESS_PROPERTY=$DST_IP_ADDRESS_PROPERTY
+	HOSTNAME_PROPERTY=$DST_HOSTNAME_PROPERTY
+    fi
 
     ##################################
     ### No User Input, assume DHCP ###
@@ -81,16 +96,8 @@ __CUSTOMIZE_PHOTON__
 # idsreplay section  remove for other projects
 # depending on appliance role (idsreplay source or target) prepare systemd service which starts the right container image with properties
 
-    IDSREPLAY_SOURCE==$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.idsreplaysource")
-    ISSOURCE=$(echo "${IDSREPLAY_SOURCE}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
-
-    IDSREPLAY_PORT_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.idsreplayport")
-    IDSREPLAY_PORT=$(echo "${IDSREPLAY_PORT_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
-
-    if [ ${ISSOURCE} == "True" ]; then
-        IDSREPLAY_TGTIP_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep "guestinfo.idsreplaytargetip")
-        IDSREPLAY_TGTIP=$(echo "${IDSREPLAY_TGTIP_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
-	IDSSTARTCMD="/usr/bin/docker run --name idsreplay-src  -e IDSREPLAYOPTS='--dest ${IDSREPLAY_TGTIP}  --dport ${IDSREPLAY_PORT}' idsreplay"
+    if [ ${ROLE} == "source" ]; then
+	IDSSTARTCMD="/usr/bin/docker run --name idsreplay-src  -e IDSREPLAYOPTS='--dest ${DST_IP_ADDRESS}  --dport ${IDSREPLAY_PORT}' idsreplay"
 	IDSSTOPCMD="/usr/bin/docker rm -f idsreplay-src"
     else
 	IDSSTARTCMD="/usr/bin/docker run --name idsreplay-tgt -p ${IDSREPLAY_PORT}:5000 nsx-demo"
