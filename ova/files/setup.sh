@@ -50,7 +50,8 @@ else
     ##################################
     ### No User Input, assume DHCP ###
     ##################################
-    if [ -z "${HOSTNAME_PROPERTY}" ]; then
+    HOSTNAME=$(echo "${HOSTNAME_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
+    if [ -z "${HOSTNAME}" ]; then
         cat > /etc/systemd/network/${NETWORK_CONFIG_FILE} << __CUSTOMIZE_PHOTON__
 [Match]
 Name=e*
@@ -63,7 +64,7 @@ __CUSTOMIZE_PHOTON__
     ### Static IP Address ###
     #########################
     else
-        HOSTNAME=$(echo "${HOSTNAME_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
+
         IP_ADDRESS=$(echo "${IP_ADDRESS_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
         NETMASK=$(echo "${NETMASK_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
         GATEWAY=$(echo "${GATEWAY_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
@@ -88,10 +89,16 @@ __CUSTOMIZE_PHOTON__
     echo -e "\e[92mRestarting Network ..." > /dev/console
     systemctl restart systemd-networkd
     fi
+    
 
     echo -e "\e[92mConfiguring root password ..." > /dev/console
     ROOT_PASSWORD=$(echo "${ROOT_PASSWORD_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
-    echo "root:${ROOT_PASSWORD}" | /usr/sbin/chpasswd
+
+    if [ -z "${ROOT_PASSWORD}" ]; then
+	echo "Empty password setting. No Change"
+    else
+        echo "root:${ROOT_PASSWORD}" | /usr/sbin/chpasswd
+    fi
 
 # idsreplay section  remove for other projects
 # depending on appliance role (idsreplay source or target) prepare systemd service which starts the right container image with properties

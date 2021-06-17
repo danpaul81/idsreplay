@@ -88,8 +88,8 @@ sed -i '/^      <vmw:ExtraConfig ovf:required="false" vmw:key="nvram".*$/d' $PAC
 sed -i "/^    <File ovf:href=\"${PHOTON_APPLIANCE_NAME}-file1.nvram\".*$/d" $PACKER_OVF
 
 
-ovftool ${PACKER_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}.ova
-chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}.ova
+ovftool ${PACKER_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
+chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
 
 rm -rf ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}
 

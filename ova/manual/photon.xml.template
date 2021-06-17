@@ -35,7 +35,7 @@
         <Category>idsreplay</Category>
         <Property ovf:userConfigurable="true" ovf:value="idsreplay-src" ovf:type="string" ovf:key="guestinfo.src_hostname">
           <Label>Source Hostname</Label>
-          <Description>Hostname of source system (leave blank for DHCP)</Description>
+          <Description>Hostname of source system</Description>
         </Property>
         <Property ovf:userConfigurable="true" ovf:value="172.16.10.110" ovf:type="string" ovf:key="guestinfo.src_ip">
           <Label>Source IP</Label>
@@ -43,7 +43,7 @@
         </Property>
         <Property ovf:userConfigurable="true" ovf:value="idsreplay-dst" ovf:type="string" ovf:key="guestinfo.dst_hostname">
           <Label>Destination Hostname</Label>
-          <Description>Hostname of destination system (leave blank for DHCP)</Description>
+          <Description>Hostname of destination system</Description>
         </Property>
         <Property ovf:userConfigurable="true" ovf:value="172.16.10.111" ovf:type="string" ovf:key="guestinfo.dst_ip">
           <Label>Destination IP</Label>
