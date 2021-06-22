@@ -14,6 +14,8 @@ import (
 	"github.com/danpaul81/idsreplay/idsparser"
 )
 
+const Version string = "0.2.0"
+
 var CountRuleMatch int
 var CountRuleError int
 var CountRuleOptError int
@@ -54,6 +56,8 @@ func analyzeRule(IDSruleLine string, rule *idsparser.Rule, debug bool) bool {
 
 func main() {
 
+	log.Printf("idsparser version %v \n", Version)
+
 	//process command line args
 	ipPtr := flag.String("dest", "127.0.0.1", "IP / hostname address of IDS replay target")
 	portPtr := flag.Uint64("dport", 80, "IP port of IDS replay target")
@@ -61,7 +65,7 @@ func main() {
 	replayCountPtr := flag.Uint("count", 0, "# of IDS replay attemps (will count successful TCP connections doing a replay request). 0 for infinite")
 	rulePtr := flag.String("rulefile", "/idsreplay/emerging-all.rules", "IDS signatures source. Suricata 4 format.")
 	debugPtr := flag.Bool("debug", false, "run in debug mode")
-	sidlistPtr := flag.String("sidlist", "", "comma separated list of rule SID to replay")
+	sidlistPtr := flag.String("sidlist", "", "comma separated list of rule SID to replay. if none of these SID is suitable random sid will be replayed")
 
 	flag.Parse()
 
@@ -69,7 +73,7 @@ func main() {
 		fmt.Print("ip port out of range:", *portPtr)
 		return
 	}
-
+	log.Printf("start processing rules. this may take a while \n")
 	// process single rule for testing cases or open rule file with multiple rules
 	single_rule := false
 
@@ -121,10 +125,11 @@ func main() {
 		return
 	}
 
-	//do we have a list of SID to replay? if not, we will run in random mode
+	var replayList []int
+	//build replay list if --sidlist option is set
 	if len(*sidlistPtr) > 0 {
 		log.Printf("Requested to replay following SID list %v \n", *sidlistPtr)
-		var replayList []int
+
 		sidList := strings.Split(*sidlistPtr, ",")
 		for _, v := range sidList {
 			v = strings.TrimSpace(v)
@@ -139,66 +144,66 @@ func main() {
 			if !validSID {
 				log.Printf("requested SID %v not found in replay repository. Will be ignored in replay \n", v)
 			}
-
 		}
-		log.Printf("Will now start replaying %v item IDS signature list to %v:%v waiting %v sec between attempts. Limit: %v \n", len(replayList), *ipPtr, *portPtr, *waitsecPtr, *replayCountPtr)
-		// TODO: merge this code with the following random replay code, maybe create a single function
-		var cont bool = true
-		var totalAttempts uint = 0
+	}
 
-		if *replayCountPtr > 0 {
+	var totalAttempts uint = 0
+	var cont bool = true
+
+	if *replayCountPtr > 0 {
+		if len(replayList) > 0 {
 			totalAttempts = *replayCountPtr * uint(len(replayList))
-			log.Printf("will run SID list %v times (resulting in %v total attempts) Note: only successful TCP connects counted. If a single replay fails it wont be counted and we'll continue with next one. \n", *replayCountPtr, totalAttempts)
+			log.Printf("replay SID list %v times (%v total attempts) to %v:%v waiting %v sec between attempts \n Note: only successful TCP connects counted. If a single replay fails it wont be counted and we'll continue with next one. \n", *replayCountPtr, totalAttempts, *ipPtr, *portPtr, *waitsecPtr)
+			CountReplay = 1
+		} else {
+			totalAttempts = *replayCountPtr
+			log.Printf("random replay (limit %v) to %v:%v waiting %v sec between attempts \n Note: only successful TCP connects counted. If a single replay fails it wont be counted and we'll continue with next one. \n", totalAttempts, *ipPtr, *portPtr, *waitsecPtr)
 			CountReplay = 1
 		}
-
-		for cont {
-			for _, x := range replayList {
-				req := "http://" + *ipPtr + ":" + fmt.Sprintf("%v", *portPtr) + "/" + HTTPRequestList[x].HTTPuri
-
-				log.Printf("# %v \t replay SID %v \t Method %v \t URI %v", CountReplay, HTTPRequestList[x].SID, HTTPRequestList[x].HTTPmethod, req)
-				_, err := http.Get(req)
-				if err != nil {
-					log.Printf("HTTP Request %v", err)
-				} else {
-					if totalAttempts > 0 {
-						//log.Printf("%v of %v total", CountReplay, totalAttempts)
-						if CountReplay == totalAttempts {
-							cont = false
-						}
-						CountReplay++
-					}
-				}
-				time.Sleep(time.Duration(*waitsecPtr) * time.Second)
-			}
-		}
-
-		// replay random rules
 	} else {
-		log.Printf("Will now start random IDS signature replay to %v:%v waiting %v sec between attempts. Limit: %v \n", *ipPtr, *portPtr, *waitsecPtr, *replayCountPtr)
-		var cont bool = true
-		if *replayCountPtr > 0 {
-			CountReplay = 1
+		if len(replayList) > 0 {
+			totalAttempts = 0
+			log.Printf("replay SID list (no limit) to %v:%v waiting %v sec between attempts\n", *ipPtr, *portPtr, *waitsecPtr)
+			CountReplay = 0
+		} else {
+			totalAttempts = 0
+			log.Printf("random replay (no limit) to %v:%v waiting %v sec between attempts\n", *ipPtr, *portPtr, *waitsecPtr)
+			CountReplay = 0
 		}
 
-		for cont {
-			rand.Seed(time.Now().UnixNano())
-			x := rand.Intn(len(HTTPRequestList))
-			req := "http://" + *ipPtr + ":" + fmt.Sprintf("%v", *portPtr) + "/" + HTTPRequestList[x].HTTPuri
+	}
 
-			log.Printf("# %v \t replay SID %v \t Method %v \t URI %v", CountReplay, HTTPRequestList[x].SID, HTTPRequestList[x].HTTPmethod, req)
-			_, err := http.Get(req)
-			if err != nil {
-				log.Printf("HTTP Request %v", err)
-			} else {
-				if *replayCountPtr > 0 {
-					if CountReplay == *replayCountPtr {
-						cont = false
-					}
+	var nextItemIndex int = 0
+	var nextItem int = 0
+	for cont {
+
+		// do we need to follow a SID list? set nextItem accordingly
+		if len(replayList) > 0 {
+			nextItem = replayList[nextItemIndex]
+			nextItemIndex++
+			if nextItemIndex == len(replayList) {
+				nextItemIndex = 0
+			}
+			// choose random nextItem
+		} else {
+			rand.Seed(time.Now().UnixNano())
+			nextItem = rand.Intn(len(HTTPRequestList))
+		}
+
+		req := "http://" + *ipPtr + ":" + fmt.Sprintf("%v", *portPtr) + "/" + HTTPRequestList[nextItem].HTTPuri
+		log.Printf("# %v \t replay SID %v \t Method %v \t URI %v", CountReplay, HTTPRequestList[nextItem].SID, HTTPRequestList[nextItem].HTTPmethod, req)
+		_, err := http.Get(req)
+		if err != nil {
+			log.Printf("HTTP Request %v", err)
+		} else {
+			if totalAttempts != 0 {
+				if CountReplay == totalAttempts {
+					cont = false
+				} else {
 					CountReplay++
 				}
 			}
-			time.Sleep(time.Duration(*waitsecPtr) * time.Second)
 		}
+		time.Sleep(time.Duration(*waitsecPtr) * time.Second)
 	}
 }
