@@ -1,6 +1,7 @@
 {
   "variables": {
-    "photon_ovf_template": "photon.xml.template",
+    "vapp_ovf_template": "vapp.xml.template",
+    "app_ovf_template": "appliance.xml.template",
     "ovftool_deploy_vcenter": "192.168.110.22",
     "ovftool_deploy_vcenter_username": "administrator@vsphere.local",
     "ovftool_deploy_vcenter_password": "VMware1!"
@@ -75,7 +76,7 @@
   "post-processors": [
     {
       "type": "shell-local",
-      "environment_vars": ["PHOTON_VERSION={{ user `version` }}", "PHOTON_NETWORK={{ user `vcenter_portgroup` }}", "PHOTON_APPLIANCE_NAME={{ user `vm_name` }}", "FINAL_PHOTON_APPLIANCE_NAME={{ user `vm_name` }}_{{user `version`}}", "PHOTON_OVF_TEMPLATE={{ user `photon_ovf_template` }}"],
+      "environment_vars": ["PHOTON_VERSION={{ user `version` }}", "PHOTON_NETWORK={{ user `vcenter_portgroup` }}", "PHOTON_APPLIANCE_NAME={{ user `vm_name` }}", "FINAL_PHOTON_APPLIANCE_NAME={{ user `vm_name` }}_{{user `version`}}", "APP_OVF_TEMPLATE={{ user `app_ovf_template` }}", "VAPP_OVF_TEMPLATE={{ user `vapp_ovf_template` }}"],
       "inline": [
         "cd manual",
         "./add_ovf_properties.sh"

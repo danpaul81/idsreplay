@@ -1,0 +1,60 @@
+    <ProductSection>
+        <Info>Information about the installed software</Info>
+        <Product>IDSreplay appliance</Product>
+        <Vendor>Daniel Paul</Vendor>
+        <Version>{{VERSION}}</Version>
+        <ProductUrl>https://github.com/danpaul81/idsreplay</ProductUrl>
+        <Category>idsreplay</Category>
+	<Property ovf:userConfigurable="true" ovf:value="idsreplay-src" ovf:type="string" ovf:key="guestinfo.idsreplayrole">
+          <Label>Role</Label>
+          <Description>is this source or target?</Description>
+	  <Value ovf:configuration="Source" ovf:value="source"/>
+	  <Value ovf:configuration="Target" ovf:value="target"/>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="idsreplay-src" ovf:type="string" ovf:key="guestinfo.src_hostname">
+          <Label>Source Hostname</Label>
+          <Description>Hostname of source system</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="172.16.10.110" ovf:type="string" ovf:key="guestinfo.src_ip">
+          <Label>Source IP</Label>
+          <Description>IP Address for source</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="idsreplay-dst" ovf:type="string" ovf:key="guestinfo.dst_hostname">
+          <Label>Destination Hostname</Label>
+          <Description>Hostname of destination system</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="172.16.10.111" ovf:type="string" ovf:key="guestinfo.dst_ip">
+          <Label>Destination IP</Label>
+          <Description>IP Address for destination</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="80" ovf:type="string" ovf:key="guestinfo.idsreplayport">
+          <Label>Target Port</Label>
+          <Description>TCP Port to use for idsreplay</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:value="24" ovf:type="string" ovf:key="guestinfo.netmask">
+          <Label>Netmask Prefix</Label>
+          <Description>CIDR notation (e.g. 24 for 255.255.255.0, 28 for 255.255.255.240)</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:password="true" ovf:type="string" ovf:key="guestinfo.root_password">
+          <Label>Root Password</Label>
+          <Description>Password to login in as root. Please use a secure password</Description>
+        </Property>
+        <Category>optional Networking</Category>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.gateway">
+          <Label>Default Gateway</Label>
+          <Description>(optional)</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.dns">
+          <Label>DNS Server</Label>
+          <Description>(optional)</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.domain">
+          <Label>DNS Domain</Label>
+          <Description>(optional)</Description>
+        </Property>
+        <Category>zDebug</Category>
+        <Property ovf:userConfigurable="true" ovf:value="False" ovf:type="boolean" ovf:key="guestinfo.debug">
+          <Label>Debugging</Label>
+          <Description>Enable Debugging</Description>
+        </Property>
+    </ProductSection>

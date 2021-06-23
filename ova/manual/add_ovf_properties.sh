@@ -2,7 +2,16 @@
 
 OUTPUT_PATH="../output-vsphere-iso"
 
-PACKER_OVF=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}.ovf
+VAPP_OVF=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}_vapp.ovf
+APP_OVF=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}_app.ovf
+
+# copy OVF files from packer output
+cp ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}.ovf ${VAPP_OVF}
+cp ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}.ovf ${APP_OVF}
+
+#####
+## STEP 1:  Modify files for vapp
+#####
 
 # set outputfiles for virtual systems
 VIRTUALSYSTEM1_TEMP=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/VirtualSystem1.xml.temp
@@ -11,30 +20,27 @@ VIRTUALSYSTEM2_TEMP=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/VirtualSystem2.xml.t
 rm -f ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}.mf
 rm -f ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/*.temp
 
-# backup original ovf file for debug
-cp ${PACKER_OVF} ${PACKER_OVF}.bak
-
 #replace envelope with simple one -> xmlstarlet doesnt work with original...
-sed -i 's/<Envelope.*/<Envelope>/g' $PACKER_OVF
+sed -i 's/<Envelope.*/<Envelope>/g' $VAPP_OVF
 
 #extract VirtualSystem definition
-xmlstarlet sel -t -c '/Envelope/VirtualSystem' $PACKER_OVF > $VIRTUALSYSTEM1_TEMP 2>/dev/null
-xmlstarlet -L  ed -d '/Envelope/VirtualSystem' $PACKER_OVF 2>/dev/null
+xmlstarlet sel -t -c '/Envelope/VirtualSystem' $VAPP_OVF > $VIRTUALSYSTEM1_TEMP 2>/dev/null
+xmlstarlet -L  ed -d '/Envelope/VirtualSystem' $VAPP_OVF 2>/dev/null
 
 #duplicate virtual system definition
 cp $VIRTUALSYSTEM1_TEMP $VIRTUALSYSTEM2_TEMP
 
 # save disksize from original OVF
-DISKSIZE=$(grep "<File" $PACKER_OVF |cut -d\" -f6)
+DISKSIZE=$(grep "<File" $VAPP_OVF |cut -d\" -f6)
 
 # replace packer-created OVF with template
-cp $PHOTON_OVF_TEMPLATE $PACKER_OVF
+cp $VAPP_OVF_TEMPLATE $VAPP_OVF
 
 # replace version/name/disksize/network in template
-sed -i "s/{{VERSION}}/${PHOTON_VERSION}/g" $PACKER_OVF
-sed -i "s/{{APPLIANCENAME}}/${PHOTON_APPLIANCE_NAME}/g" $PACKER_OVF
-sed -i "s/{{DISKSIZE}}/${DISKSIZE}/g" $PACKER_OVF
-sed -i "s/{{NETWORK}}/${PHOTON_NETWORK}/g" $PACKER_OVF
+sed -i "s/{{VERSION}}/${PHOTON_VERSION}/g" $VAPP_OVF
+sed -i "s/{{APPLIANCENAME}}/${PHOTON_APPLIANCE_NAME}/g" $VAPP_OVF
+sed -i "s/{{DISKSIZE}}/${DISKSIZE}/g" $VAPP_OVF
+sed -i "s/{{NETWORK}}/${PHOTON_NETWORK}/g" $VAPP_OVF
 
 
 #setup Virtual System for idsreplay source
@@ -72,24 +78,45 @@ EOF
   </VirtualSystem>
 EOF
 
-cat $VIRTUALSYSTEM1_TEMP >>$PACKER_OVF
-cat $VIRTUALSYSTEM2_TEMP >>$PACKER_OVF
+cat $VIRTUALSYSTEM1_TEMP >>$VAPP_OVF
+cat $VIRTUALSYSTEM2_TEMP >>$VAPP_OVF
 
-cat >>$PACKER_OVF <<EOF
+cat >>$VAPP_OVF <<EOF
   </VirtualSystemCollection>
 </Envelope>
 EOF
 
 # replace network used by packer with generic one
-sed -i "s/${PHOTON_NETWORK}/VM_Network/g" $PACKER_OVF
+sed -i "s/${PHOTON_NETWORK}/VM_Network/g" $VAPP_OVF
 
-sed -i 's/<VirtualHardwareSection>/<VirtualHardwareSection ovf:transport="com.vmware.guestInfo">/g' $PACKER_OVF
-sed -i '/^      <vmw:ExtraConfig ovf:required="false" vmw:key="nvram".*$/d' $PACKER_OVF
-sed -i "/^    <File ovf:href=\"${PHOTON_APPLIANCE_NAME}-file1.nvram\".*$/d" $PACKER_OVF
+sed -i 's/<VirtualHardwareSection>/<VirtualHardwareSection ovf:transport="com.vmware.guestInfo">/g' $VAPP_OVF
+sed -i '/^      <vmw:ExtraConfig ovf:required="false" vmw:key="nvram".*$/d' $VAPP_OVF
+sed -i "/^    <File ovf:href=\"${PHOTON_APPLIANCE_NAME}-file1.nvram\".*$/d" $VAPP_OVF
+
+#####
+## STEP 2:  Modify files for virtual appliance
+#####
+
+TEMPLATENETWORK=$(grep "Network ovf:name" $APP_OVF |cut -d\" -f2)
+sed -i "s/${TEMPLATENETWORK}/VM_Network/g" $APP_OVF
+
+sed -i "s/${PHOTON_NETWORK}/VM_Network/g" $APP_OVF
+sed -i 's/<VirtualHardwareSection>/<VirtualHardwareSection ovf:transport="com.vmware.guestInfo">/g' $APP_OVF
+sed -i "/    <\/vmw:BootOrderSection>/ r ${APP_OVF_TEMPLATE}" $APP_OVF
+sed -i '/^      <vmw:ExtraConfig ovf:required="false" vmw:key="nvram".*$/d' $APP_OVF
+sed -i "/^    <File ovf:href=\"${PHOTON_APPLIANCE_NAME}-file1.nvram\".*$/d" $APP_OVF
 
 
-ovftool ${PACKER_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
-chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
+#####
+## STEP 3:  Create vapp and appliance & cleanup
+#####
 
-rm -rf ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}
+#ovftool ${VAPP_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
+#chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
+
+ovftool ${APP_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_app.ova
+chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_app.ova
+
+
+#rm -rf ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}
 
