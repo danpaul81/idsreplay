@@ -7,6 +7,8 @@ I'm using it to demo VMware NSX IDS/IPS without the need to install tools like m
 
 The current version parses rules from the [Open Emerging Threats Ruleset](https://rules.emergingthreats.net/open/suricata-4.0/) and replays randomly some of the basic http rules (~300)
 
+If you want to replay a pre-defined set of SID you can pass them using the --sidlist parameter (within the IDSREPLAYOPTS environment variable when using the container images or define them in the deployment options when using the ova files.
+
 
 
 ## 1) How to run?
@@ -19,7 +21,7 @@ I've also created container images, a k8s deployment and OVA image.
 #### Run a Container image based demo against IP 172.16.10.20 TCP Port 80
 
 ```bash
-docker run --name=idsreplay -e IDSREPLAYOPTS='--dest 172.16.10.20 --dport 80' danpaul81/idsreplay
+docker run --name=idsreplay -e IDSREPLAYOPTS='--dest 172.16.10.20 --dport 80' danpaul81/idsreplay:latest
 ```
 
 #### To setup a  possible target you can use the simple golang webserver on host 172.16.10.20
@@ -37,11 +39,11 @@ When using in non-vmware corp network  change the image source to your own regis
 ### c) OVA Image
 Download from [my repo](https://github.com/danpaul81/idsreplay/releases)
 
-Target and Source are combined in this ova.
+There is a *_vapp.ova which automatically creates source and target VM within a vApp.
 
-#### Deploy first time with option "IDS Replay Source" = True, the Target Port and the Target IP
-
-#### Deploy second time with option "IDS Replay Source" = False and the Target Port
+If you cannot create a vApp in your vCenter you can also deploy the *_app.ova two times with the same (!) settings except:
+#### Deploy first time with option "Rolename" "target"
+#### Deploy second time with option "Rolename" "source"
 
 ## 2) How to Demo NSX IPS mode?
 Most of the replayed rules will match NSX IDS Signature 2024897 which matches the http user agent "go http client user-agent". 
@@ -53,10 +55,13 @@ You can pass command line options to container based workloads using the IDSREPL
 
 Valid options are:
 ```
+--count [num of replay attempts] default 0 -> unlimited, counts only successful TCP connects
+--debug debug mode, show details when parsing rules
 --dest [target ip or fqdn], default 127.0.0.1
 --dport [target tcp port], default 80
---count [num of replay attempts] default 0 -> unlimited, counts only successful TCP connects
---waitsec [seconds to wait between replay attempts], default 5
 --rulefile [path to ids signatures, suricata 4 format] default /idsreplay/emerging-all.rules
+--sidlist [comma separated list of rule SID] replay a set of pre-defined rules
+--waitsec [seconds to wait between replay attempts], default 5
+
 ```
 
