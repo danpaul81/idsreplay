@@ -22,7 +22,7 @@ I've also created container images, a k8s deployment and OVA image.
 #### Run a Container image based demo against IP 172.16.10.20 TCP Port 80
 
 ```bash
-docker run --name=idsreplay -e IDSREPLAYOPTS='--dest 172.16.10.20 --dport 80' danpaul81/idsreplay:latest
+docker run --name=idsreplay -e IDSREPLAYOPTS='--dest 172.16.10.20 --dport 80' danpaul81/idsreplay:0.2.0
 ```
 
 #### To setup a  possible target you can use the simple golang webserver on host 172.16.10.20
