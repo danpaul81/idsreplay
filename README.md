@@ -7,7 +7,8 @@ I'm using it to demo VMware NSX IDS/IPS without the need to install tools like m
 
 The current version parses rules from the [Open Emerging Threats Ruleset](https://rules.emergingthreats.net/open/suricata-4.0/) and replays randomly some of the basic http rules (~300)
 
-If you want to replay a pre-defined set of SID you can pass them using the --sidlist parameter (within the IDSREPLAYOPTS environment variable when using the container images or define them in the deployment options when using the ova files.
+If you want to replay a pre-defined set of SID you can pass them using the --sidlist parameter 
+(defined within the IDSREPLAYOPTS environment variable when using the container images or define them in the deployment options when using the ova files)
 
 
 
