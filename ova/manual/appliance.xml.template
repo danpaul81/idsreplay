@@ -5,11 +5,14 @@
         <Version>{{VERSION}}</Version>
         <ProductUrl>https://github.com/danpaul81/idsreplay</ProductUrl>
         <Category>idsreplay</Category>
-	<Property ovf:userConfigurable="true" ovf:value="idsreplay-src" ovf:type="string" ovf:key="guestinfo.idsreplayrole">
-          <Label>Role</Label>
-          <Description>is this source or target?</Description>
-	  <Value ovf:configuration="Source" ovf:value="source"/>
-	  <Value ovf:configuration="Target" ovf:value="target"/>
+	<Property
+	    ovf:key="guestinfo.idsreplayrole"
+	    ovf:type="string"
+	    ovf:userConfigurable="true"
+	    ovf:value="source"
+	    ovf:qualifiers="ValueMap{&quot;source&quot;,&quot;target&quot;}">
+        <Label>Rolename</Label>
+        <Description> The role for this VM. Currently supports 'source' OR 'target' as rolename.</Description>
         </Property>
         <Property ovf:userConfigurable="true" ovf:value="idsreplay-src" ovf:type="string" ovf:key="guestinfo.src_hostname">
           <Label>Source Hostname</Label>
@@ -30,6 +33,10 @@
         <Property ovf:userConfigurable="true" ovf:value="80" ovf:type="string" ovf:key="guestinfo.idsreplayport">
           <Label>Target Port</Label>
           <Description>TCP Port to use for idsreplay</Description>
+        </Property>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.sidlist">
+          <Label>SID list for replay</Label>
+          <Description>optional comma separated list of SID to replay</Description>
         </Property>
         <Property ovf:userConfigurable="true" ovf:value="24" ovf:type="string" ovf:key="guestinfo.netmask">
           <Label>Netmask Prefix</Label>

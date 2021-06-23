@@ -33,10 +33,16 @@ else
     ROOT_PASSWORD_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.root_password")
     IDSREPLAY_ROLE_PROPERTY==$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.idsreplayrole")
     IDSREPLAY_PORT_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.idsreplayport")
-
+    IDSREPLAY_SIDLIST_PROPERTY=$(vmtoolsd --cmd "info-get guestinfo.ovfEnv" | grep -m1 "guestinfo.sidlist")
 
     ROLE=$(echo "${IDSREPLAY_ROLE_PROPERTY}" | cut -d'"' -f4)
     IDSREPLAY_PORT=$(echo "${IDSREPLAY_PORT_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
+    IDSREPLAY_SIDLIST=$(echo "${IDSREPLAY_SIDLIST_PROPERTY}" | cut -d'"' -f4)
+    
+    if ! [ -z "${IDSREPLAY_SIDLIST}" ]; then
+	IDSREPLAY_SIDLIST="--sidlist '${IDSREPLAY_SIDLIST}'"
+    fi
+
 
     if [ ${ROLE} == "source" ]; then
         DST_IP_ADDRESS=$(echo "${DST_IP_ADDRESS_PROPERTY}" | awk -F 'oe:value="' '{print $2}' | awk -F '"' '{print $1}')
@@ -104,7 +110,7 @@ __CUSTOMIZE_PHOTON__
 # depending on appliance role (idsreplay source or target) prepare systemd service which starts the right container image with properties
 
     if [ ${ROLE} == "source" ]; then
-	IDSSTARTCMD="/usr/bin/docker run --name idsreplay-src  -e IDSREPLAYOPTS='--dest ${DST_IP_ADDRESS}  --dport ${IDSREPLAY_PORT}' idsreplay"
+	IDSSTARTCMD="/usr/bin/docker run --name idsreplay-src  -e IDSREPLAYOPTS='--dest ${DST_IP_ADDRESS}  --dport ${IDSREPLAY_PORT} ${IDSREPLAY_SIDLIST}' idsreplay"
 	IDSSTOPCMD="/usr/bin/docker rm -f idsreplay-src"
     else
 	IDSSTARTCMD="/usr/bin/docker run --name idsreplay-tgt -p ${IDSREPLAY_PORT}:5000 nsx-demo"

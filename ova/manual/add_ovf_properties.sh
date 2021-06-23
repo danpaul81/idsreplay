@@ -1,9 +1,15 @@
 #!/bin/bash
 
-OUTPUT_PATH="../output-vsphere-iso"
+ORIGPATH=$(pwd)
+cd ..
+OUTPUT_PATH="$(pwd)/output-vsphere-iso"
+cd $ORIGPATH
 
 VAPP_OVF=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}_vapp.ovf
+VAPP_MF=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}_vapp.mf
+
 APP_OVF=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}_app.ovf
+APP_MF=${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}_app.mf
 
 # copy OVF files from packer output
 cp ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}/${PHOTON_APPLIANCE_NAME}.ovf ${VAPP_OVF}
@@ -100,9 +106,11 @@ sed -i "/^    <File ovf:href=\"${PHOTON_APPLIANCE_NAME}-file1.nvram\".*$/d" $VAP
 TEMPLATENETWORK=$(grep "Network ovf:name" $APP_OVF |cut -d\" -f2)
 sed -i "s/${TEMPLATENETWORK}/VM_Network/g" $APP_OVF
 
-sed -i "s/${PHOTON_NETWORK}/VM_Network/g" $APP_OVF
+
+
 sed -i 's/<VirtualHardwareSection>/<VirtualHardwareSection ovf:transport="com.vmware.guestInfo">/g' $APP_OVF
 sed -i "/    <\/vmw:BootOrderSection>/ r ${APP_OVF_TEMPLATE}" $APP_OVF
+sed -i "s/{{VERSION}}/${PHOTON_VERSION}/g" $APP_OVF
 sed -i '/^      <vmw:ExtraConfig ovf:required="false" vmw:key="nvram".*$/d' $APP_OVF
 sed -i "/^    <File ovf:href=\"${PHOTON_APPLIANCE_NAME}-file1.nvram\".*$/d" $APP_OVF
 
@@ -111,12 +119,17 @@ sed -i "/^    <File ovf:href=\"${PHOTON_APPLIANCE_NAME}-file1.nvram\".*$/d" $APP
 ## STEP 3:  Create vapp and appliance & cleanup
 #####
 
-#ovftool ${VAPP_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
-#chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
+#generate manifest with hash
+cd ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}
+openssl sha1 ${PHOTON_APPLIANCE_NAME}_vapp.ovf ${PHOTON_APPLIANCE_NAME}-disk-0.vmdk > ${VAPP_MF}
+openssl sha1 ${PHOTON_APPLIANCE_NAME}_app.ovf  ${PHOTON_APPLIANCE_NAME}-disk-0.vmdk > ${APP_MF}
+cd $ORIGPATH
+
+ovftool ${VAPP_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
+chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_vapp.ova
 
 ovftool ${APP_OVF} ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_app.ova
 chmod a+r ${OUTPUT_PATH}/${FINAL_PHOTON_APPLIANCE_NAME}_app.ova
 
-
-#rm -rf ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}
+rm -rf ${OUTPUT_PATH}/${PHOTON_APPLIANCE_NAME}
 

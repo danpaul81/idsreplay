@@ -13,8 +13,8 @@ echo '> Start Docker'
 systemctl start docker
 
 echo '> Loading Docker Images'
-docker pull harbor-repo.vmware.com/dpaul/idsreplay
-docker tag harbor-repo.vmware.com/dpaul/idsreplay idsreplay
+docker pull harbor-repo.vmware.com/dpaul/idsreplay:latest
+docker tag harbor-repo.vmware.com/dpaul/idsreplay:latest idsreplay
 docker pull harbor-repo.vmware.com/dpaul/nsx-demo
 docker tag harbor-repo.vmware.com/dpaul/nsx-demo nsx-demo
 

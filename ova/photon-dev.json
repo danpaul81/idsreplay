@@ -8,10 +8,14 @@
     "ovftool_deploy_datacenter": "DC-SiteA",
     "ovftool_deploy_cluster": "Compute-Cluster",
     "ovftool_deploy_vapp_name": "PACKER-TEST-idsreplay-vApp",
+    "ovftool_deploy_app_src": "PACKER-TEST-idsreplay-appliance-src",
+    "ovftool_deploy_app_tgt": "PACKER-TEST-idsreplay-appliance-tgt",
     "ovftool_deploy_vm_hostname1": "idsreplay-source.corp.local",
     "ovftool_deploy_vm_hostname2": "idsreplay-target.corp.local",
     "ovftool_deploy_vm_ip_address1": "172.16.10.151",
     "ovftool_deploy_vm_ip_address2": "172.16.10.152",
+    "ovftool_deploy_vm_ip_address3": "172.16.10.161",
+    "ovftool_deploy_vm_ip_address4": "172.16.10.162",
     "ovftool_deploy_vm_prefix": "24",
     "ovftool_deploy_vm_gateway": "172.16.10.1",
     "ovftool_deploy_vm_dns": "192.168.110.10",
@@ -102,13 +106,24 @@
         "./add_ovf_properties.sh"
       ]
     },
-     {
+    {
       "type": "shell-local",
       "inline": [
-        "ovftool --noSSLVerify --powerOn --name={{ user `ovftool_deploy_vapp_name` }} --net:'VM_Network={{ user `ovftool_deploy_vm_network` }}' --datastore={{ user `ovftool_deploy_vm_datastore` }} --prop:guestinfo.src_hostname={{ user `ovftool_deploy_vm_hostname1` }} --prop:guestinfo.dst_hostname={{ user `ovftool_deploy_vm_hostname2` }} --prop:guestinfo.src_ip={{ user `ovftool_deploy_vm_ip_address1` }} --prop:guestinfo.dst_ip={{ user `ovftool_deploy_vm_ip_address2` }} --prop:guestinfo.netmask={{ user `ovftool_deploy_vm_prefix` }} --prop:guestinfo.gateway={{ user `ovftool_deploy_vm_gateway` }} --prop:guestinfo.dns={{ user `ovftool_deploy_vm_dns` }} --prop:guestinfo.domain={{ user `ovftool_deploy_vm_dns_domain` }} --prop:guestinfo.root_password={{ user `ovftool_deploy_vm_root_password` }} --prop:guestinfo.debug=False --prop:guestinfo.idsreplayport={{ user `ovftool_deploy_idsreplayport` }} output-vsphere-iso/{{ user `vm_name` }}_{{user `version`}}.ova 'vi://{{ user `ovftool_deploy_vcenter_username` }}:{{ user `ovftool_deploy_vcenter_password` }}@{{ user `ovftool_deploy_vcenter` }}/{{ user `ovftool_deploy_datacenter` }}/host/{{ user `ovftool_deploy_cluster` }}/'"
+        "ovftool --noSSLVerify --powerOn --name={{ user `ovftool_deploy_vapp_name` }} --net:'VM_Network={{ user `ovftool_deploy_vm_network` }}' --datastore={{ user `ovftool_deploy_vm_datastore` }} --prop:guestinfo.src_hostname={{ user `ovftool_deploy_vm_hostname1` }} --prop:guestinfo.dst_hostname={{ user `ovftool_deploy_vm_hostname2` }} --prop:guestinfo.src_ip={{ user `ovftool_deploy_vm_ip_address1` }} --prop:guestinfo.dst_ip={{ user `ovftool_deploy_vm_ip_address2` }} --prop:guestinfo.netmask={{ user `ovftool_deploy_vm_prefix` }} --prop:guestinfo.gateway={{ user `ovftool_deploy_vm_gateway` }} --prop:guestinfo.dns={{ user `ovftool_deploy_vm_dns` }} --prop:guestinfo.domain={{ user `ovftool_deploy_vm_dns_domain` }} --prop:guestinfo.root_password={{ user `ovftool_deploy_vm_root_password` }} --prop:guestinfo.debug=False --prop:guestinfo.idsreplayport={{ user `ovftool_deploy_idsreplayport` }} output-vsphere-iso/{{ user `vm_name` }}_{{user `version`}}_vapp.ova 'vi://{{ user `ovftool_deploy_vcenter_username` }}:{{ user `ovftool_deploy_vcenter_password` }}@{{ user `ovftool_deploy_vcenter` }}/{{ user `ovftool_deploy_datacenter` }}/host/{{ user `ovftool_deploy_cluster` }}/'"
       ]
     },
-
+    {
+      "type": "shell-local",
+      "inline": [
+        "ovftool --noSSLVerify --powerOn --name={{ user `ovftool_deploy_app_tgt` }} --net:'VM_Network={{ user `ovftool_deploy_vm_network` }}' --datastore={{ user `ovftool_deploy_vm_datastore` }} --prop:guestinfo.idsreplayrole=target --prop:guestinfo.src_hostname={{ user `ovftool_deploy_vm_hostname1` }} --prop:guestinfo.dst_hostname={{ user `ovftool_deploy_vm_hostname2` }} --prop:guestinfo.src_ip={{ user `ovftool_deploy_vm_ip_address3` }} --prop:guestinfo.dst_ip={{ user `ovftool_deploy_vm_ip_address4` }} --prop:guestinfo.netmask={{ user `ovftool_deploy_vm_prefix` }} --prop:guestinfo.gateway={{ user `ovftool_deploy_vm_gateway` }} --prop:guestinfo.dns={{ user `ovftool_deploy_vm_dns` }} --prop:guestinfo.domain={{ user `ovftool_deploy_vm_dns_domain` }} --prop:guestinfo.root_password={{ user `ovftool_deploy_vm_root_password` }} --prop:guestinfo.debug=False --prop:guestinfo.idsreplayport={{ user `ovftool_deploy_idsreplayport` }} output-vsphere-iso/{{ user `vm_name` }}_{{user `version`}}_app.ova 'vi://{{ user `ovftool_deploy_vcenter_username` }}:{{ user `ovftool_deploy_vcenter_password` }}@{{ user `ovftool_deploy_vcenter` }}/{{ user `ovftool_deploy_datacenter` }}/host/{{ user `ovftool_deploy_cluster` }}/'"
+      ]
+    },
+    {
+      "type": "shell-local",
+      "inline": [
+        "ovftool --noSSLVerify --powerOn --name={{ user `ovftool_deploy_app_src` }} --net:'VM_Network={{ user `ovftool_deploy_vm_network` }}' --datastore={{ user `ovftool_deploy_vm_datastore` }} --prop:guestinfo.sidlist='2015853,2013929,2008617' --prop:guestinfo.idsreplayrole=source --prop:guestinfo.src_hostname={{ user `ovftool_deploy_vm_hostname1` }} --prop:guestinfo.dst_hostname={{ user `ovftool_deploy_vm_hostname2` }} --prop:guestinfo.src_ip={{ user `ovftool_deploy_vm_ip_address3` }} --prop:guestinfo.dst_ip={{ user `ovftool_deploy_vm_ip_address4` }} --prop:guestinfo.netmask={{ user `ovftool_deploy_vm_prefix` }} --prop:guestinfo.gateway={{ user `ovftool_deploy_vm_gateway` }} --prop:guestinfo.dns={{ user `ovftool_deploy_vm_dns` }} --prop:guestinfo.domain={{ user `ovftool_deploy_vm_dns_domain` }} --prop:guestinfo.root_password={{ user `ovftool_deploy_vm_root_password` }} --prop:guestinfo.debug=False --prop:guestinfo.idsreplayport={{ user `ovftool_deploy_idsreplayport` }} output-vsphere-iso/{{ user `vm_name` }}_{{user `version`}}_app.ova 'vi://{{ user `ovftool_deploy_vcenter_username` }}:{{ user `ovftool_deploy_vcenter_password` }}@{{ user `ovftool_deploy_vcenter` }}/{{ user `ovftool_deploy_datacenter` }}/host/{{ user `ovftool_deploy_cluster` }}/'"
+      ]
+    },
     {
       "type": "shell-local",
       "inline": [

@@ -53,6 +53,10 @@
           <Label>Target Port</Label>
           <Description>TCP Port to use for idsreplay</Description>
         </Property>
+        <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.sidlist">
+          <Label>SID list for replay</Label>
+          <Description>optional comma separated list of SID to replay</Description>
+        </Property>
         <Property ovf:userConfigurable="true" ovf:value="24" ovf:type="string" ovf:key="guestinfo.netmask">
           <Label>Netmask Prefix</Label>
           <Description>CIDR notation (e.g. 24 for 255.255.255.0, 28 for 255.255.255.240)</Description>
