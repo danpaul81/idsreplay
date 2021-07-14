@@ -175,7 +175,9 @@ func main() {
 
 	var nextItemIndex int = 0
 	var nextItem int = 0
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
 
 	for cont {
 
@@ -213,8 +215,9 @@ func main() {
 					CountReplay++
 				}
 			}
+			resp.Body.Close()
 		}
-		resp.Body.Close()
+
 		time.Sleep(time.Duration(*waitsecPtr) * time.Second)
 	}
 }
