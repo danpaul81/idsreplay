@@ -4,6 +4,8 @@ idsreplay reads IDS/IPS signature rule files (suricata format) and replays selec
 
 I'm using it to demo VMware NSX IDS/IPS without the need to install tools like metasploit or known vulnerable software versions.
 
+Stephan Wolf created a YouTube Video: [See it in action](https://www.youtube.com/watch?v=iMnIwOu5QhY)
+
 
 The current version parses rules from the [Open Emerging Threats Ruleset](https://rules.emergingthreats.net/open/suricata-4.0/) and replays randomly some of the basic http rules (~300)
 
