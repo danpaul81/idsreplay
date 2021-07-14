@@ -14,7 +14,7 @@ import (
 	"github.com/danpaul81/idsreplay/idsparser"
 )
 
-const Version string = "0.2.0"
+const Version string = "0.2.1"
 
 var CountRuleMatch int
 var CountRuleError int
@@ -175,6 +175,8 @@ func main() {
 
 	var nextItemIndex int = 0
 	var nextItem int = 0
+	client := &http.Client{}
+
 	for cont {
 
 		// do we need to follow a SID list? set nextItem accordingly
@@ -190,9 +192,17 @@ func main() {
 			nextItem = rand.Intn(len(HTTPRequestList))
 		}
 
-		req := "http://" + *ipPtr + ":" + fmt.Sprintf("%v", *portPtr) + "/" + HTTPRequestList[nextItem].HTTPuri
-		log.Printf("# %v \t replay SID %v \t Method %v \t URI %v", CountReplay, HTTPRequestList[nextItem].SID, HTTPRequestList[nextItem].HTTPmethod, req)
-		_, err := http.Get(req)
+		url := "http://" + *ipPtr + ":" + fmt.Sprintf("%v", *portPtr) + "/" + HTTPRequestList[nextItem].HTTPuri
+		req, err := http.NewRequest(HTTPRequestList[nextItem].HTTPmethod, url, nil)
+		if err != nil {
+			log.Printf("URL Composition %v", err)
+		}
+
+		req.Header.Add("X-idsreplay-sid", HTTPRequestList[nextItem].SID)
+
+		log.Printf("# %v \t replay SID %v \t Method %v \t URI %v", CountReplay, HTTPRequestList[nextItem].SID, HTTPRequestList[nextItem].HTTPmethod, url)
+		_, err = client.Do(req)
+
 		if err != nil {
 			log.Printf("HTTP Request %v", err)
 		} else {
