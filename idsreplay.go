@@ -201,7 +201,7 @@ func main() {
 		req.Header.Add("X-idsreplay-sid", HTTPRequestList[nextItem].SID)
 
 		log.Printf("# %v \t replay SID %v \t Method %v \t URI %v", CountReplay, HTTPRequestList[nextItem].SID, HTTPRequestList[nextItem].HTTPmethod, url)
-		_, err = client.Do(req)
+		resp, err := client.Do(req)
 
 		if err != nil {
 			log.Printf("HTTP Request %v", err)
@@ -214,6 +214,7 @@ func main() {
 				}
 			}
 		}
+		resp.Body.Close()
 		time.Sleep(time.Duration(*waitsecPtr) * time.Second)
 	}
 }
