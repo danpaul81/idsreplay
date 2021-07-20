@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "IDSreplay vApp",
   "vm_name": "IDSreplay_Appliance",
   "iso_checksum": "md5:20f48f2dfe8d40a914609eb6b220fd70",

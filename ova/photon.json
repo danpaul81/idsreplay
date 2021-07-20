@@ -71,6 +71,11 @@
       "type": "file",
       "source": "files/setup.sh",
       "destination": "/root/setup.sh"
+    },
+    {
+      "type": "file",
+      "source": "../avi_waf_sid.txt",
+      "destination": "/root/avi_waf_sid.txt"
     }
   ],
   "post-processors": [

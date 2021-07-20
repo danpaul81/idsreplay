@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.2.0"
+VERSION="0.2.1"
 
 go build -o bin/idsreplay .
 docker build . -t idsreplay

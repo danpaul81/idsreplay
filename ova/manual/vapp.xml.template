@@ -83,4 +83,9 @@
           <Label>Debugging</Label>
           <Description>Enable Debugging</Description>
         </Property>
+        <Property ovf:userConfigurable="false" ovf:value="False" ovf:type="boolean" ovf:key="guestinfo.avimode">
+          <Label>AVI WAF Demo Mode</Label>
+          <Description>replay pre-selected SIDs for AVI WAF demo. Overrides SID list setting</Description>
+        </Property>
+
     </ProductSection>
