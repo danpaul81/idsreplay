@@ -53,7 +53,15 @@ Most of the replayed rules will match NSX IDS Signature 2024897 which matches th
 
 Setting this signature action to "drop" and creating a prevent rule should work fine.
 
-## 3) idsreplay command line options
+## 3) How to Demo AVI WAF mode?
+create a AVI application and enable WAF mode
+you can use idsreplay virtual appliance in "target" role as backend-server(s)
+
+configure source:
+when running the go source or docker image add the --sidlist parameter with [these sids](https://github.com/danpaul81/idsreplay/blob/main/avi_waf_sid.txt)
+when using idsreplay appliance (not vapp) in "source" role configure AVI VIF as destination IP and select "AVI WAF Demo Mode"
+
+## 4) idsreplay command line options
 You can pass command line options to container based workloads using the IDSREPLAYOPTS environment variable. 
 
 Valid options are:
