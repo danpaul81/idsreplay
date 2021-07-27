@@ -61,6 +61,7 @@ you can use idsreplay virtual appliance in "target" role as backend-server(s)
 configure source:
 
 when running the go source or docker image add the --sidlist parameter with [these sids](https://github.com/danpaul81/idsreplay/blob/main/avi_waf_sid.txt)
+
 when using idsreplay appliance (not vapp) in "source" role configure AVI VIF as destination IP and select "AVI WAF Demo Mode"
 
 ## 4) idsreplay command line options
