@@ -68,6 +68,7 @@ const (
 	ssh
 	ftpdata
 	dcerpc
+	tcpstream
 )
 
 //
@@ -87,6 +88,7 @@ var ruleProtocolMatchTypeVals = map[ruleProtocolMatchType]string{
 	ssh:     "ssh",
 	ftpdata: "ftp-data",
 	dcerpc:  "dcerpc",
+	tcpstream: "tcp-stream",
 }
 
 //allProtocolMatchTypeNames returns a slice of valid protocol keywords
@@ -189,6 +191,8 @@ const (
 	dceiface
 	dceopnum
 	ttl
+	target
+	flowint
 )
 
 //
@@ -268,6 +272,8 @@ var ruleOptionMatchTypeVals = map[ruleOptionMatchType]string{
 	tlsversion:       "tls.version",
 	tlsfingerprint:   "tls.fingerprint",
 	tlscertserial:    "tls_cert_serial",
+	target:			  "target",
+	flowint:		  "flowint",
 }
 
 //allOptionMatchTypeNames returns a slice of valid option keywords

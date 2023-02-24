@@ -14,7 +14,7 @@ import (
 	"github.com/danpaul81/idsreplay/idsparser"
 )
 
-const Version string = "0.2.1"
+const Version string = "0.2.2"
 
 var CountRuleMatch int
 var CountRuleError int
